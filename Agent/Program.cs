@@ -35,7 +35,7 @@ namespace Agent
 
         public static void DumpAnimations(string path)
         {
-            AgentFile af = new(path);
+            AgentFile af = new(File.OpenRead(path));
 
             string[] anims = af.GetAnimationsNames();
             EncodingStringWriter sw = new(Encoding.ASCII);
