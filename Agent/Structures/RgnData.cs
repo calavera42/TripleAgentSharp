@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct RgnData
+    public struct RgnData
     {
         public uint Size;
         public uint RegionType;

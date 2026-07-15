@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct BalloonInfo
+    public struct BalloonInfo
     {
         public byte NumberTextLines;
         public byte CharsPerLine;

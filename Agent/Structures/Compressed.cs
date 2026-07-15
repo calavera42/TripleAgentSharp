@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct Compressed
+    public struct Compressed
     {
         public bool IsCompressed => CompressedSize != UncompressedSize;
 

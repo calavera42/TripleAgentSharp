@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct ACSLocator
+    public struct ACSLocator
     {
         public uint Offset;
         public uint Size;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct CharacterInfo
+    public struct CharacterInfo
     {
         public ushort MinorVersion;
         public ushort MajorVersion;
@@ -23,7 +23,7 @@ namespace Agent.Structures
         public VoiceInfo VoiceInfo;
         public BalloonInfo BalloonInfo;
         public ColorPalette Palette;
-        public bool SystemTrayIcon;
+        public Icon? TrayIcon;
         public Dictionary<string, string[]> StateInfo;
     }
 }

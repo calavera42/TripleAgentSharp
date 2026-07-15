@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct ImageInfo
+    public struct ImageInfo
     {
         public byte Unknown;
         public ushort Width;

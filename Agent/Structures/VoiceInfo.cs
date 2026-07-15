@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct VoiceInfo
+    public struct VoiceInfo
     {
         public Guid TTSEngineID;
         public Guid TTSModeID;

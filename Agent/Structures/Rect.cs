@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct Rect
+    public struct Rect
     {
         public int Left;
         public int Top;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct Datablock
+    public struct Datablock
     {
         public uint Size;
         public byte[] Data;

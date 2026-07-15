@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct BranchInfo // byte
+    public struct BranchInfo // byte
     {
         public ushort TargetFrameIndex;
         public ushort Probability;

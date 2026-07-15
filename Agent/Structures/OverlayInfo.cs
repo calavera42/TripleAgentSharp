@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct OverlayInfo // byte
+    public struct OverlayInfo // byte
     {
         public MouthOverlay OverlayType;
         public bool ReplaceTopFrameImage;

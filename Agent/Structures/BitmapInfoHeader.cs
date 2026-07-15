@@ -1,6 +1,6 @@
 ﻿namespace Agent.Structures
 {
-    struct BitmapInfoHeader
+    public struct BitmapInfoHeader
     {
         public uint Size;
         public int Width;

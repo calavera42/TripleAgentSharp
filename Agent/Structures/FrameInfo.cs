@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct FrameInfo // ushort
+    public struct FrameInfo // ushort
     {
         public FrameImage[] Layers;
         public short AudioIndex;

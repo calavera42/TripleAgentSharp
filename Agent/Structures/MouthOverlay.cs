@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    enum MouthOverlay : byte
+    public enum MouthOverlay : byte
     {
         Closed = 0,
         WideOpen1 = 1,

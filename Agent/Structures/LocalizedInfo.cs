@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct LocalizedInfo
+    public struct LocalizedInfo
     {
         public ushort LangID;
         public string CharacterName;

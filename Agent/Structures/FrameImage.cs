@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Agent.Structures
 {
-    internal struct FrameImage // ushort
+    public struct FrameImage // ushort
     {
-        public uint FrameIndex;
+        public uint ImageIndex;
         public uint OffsetX;
         public uint OffsetY;
     }

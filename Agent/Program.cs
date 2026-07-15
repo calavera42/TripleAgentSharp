@@ -37,7 +37,7 @@ namespace Agent
         {
             AgentFile af = new(path);
 
-            string[] anims = af.GetAnimationNames();
+            string[] anims = af.GetAnimationsNames();
             EncodingStringWriter sw = new(Encoding.ASCII);
             Console.WriteLine(sw.Encoding.EncodingName);
 
@@ -57,7 +57,7 @@ namespace Agent
                 for (int i = 0; i < ai.Frames.Length; i++)
                 {
                     FrameInfo fi = ai.Frames[i];
-                    sw.WriteLine($"{i}{separator}{fi.Duration}{separator}{fi.ExitFrameIndex}{separator}{string.Join(", ", fi.Layers.Select(x => x.FrameIndex))}{separator}{string.Join(", ", fi.Branches.Select(x => x.TargetFrameIndex.ToString()))}{separator}{fi.MouthOverlays.Length}{separator}{fi.AudioIndex}");
+                    sw.WriteLine($"{i}{separator}{fi.Duration}{separator}{fi.ExitFrameIndex}{separator}{string.Join(", ", fi.Layers.Select(x => x.ImageIndex))}{separator}{string.Join(", ", fi.Branches.Select(x => x.TargetFrameIndex.ToString()))}{separator}{fi.MouthOverlays.Length}{separator}{fi.AudioIndex}");
                 }
             }
 
