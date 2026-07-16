@@ -31,7 +31,7 @@ namespace Agent
         }
 
         public string[] GetAnimationsNames() => _reader.GetAnimationNames();
-        public string[] GetStateAnimations(string name) => _charInfo.StateInfo[name];
+        public string[] GetStateAnimations(string name) => _charInfo.StateInfo[name.ToLowerInvariant()];
 
         public Bitmap ReadImage(uint index) => _reader.ReadImage(index);
         public MemoryStream ReadAudioStream(uint index) => _reader.ReadAudioStream(index);

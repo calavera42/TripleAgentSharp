@@ -47,7 +47,7 @@ namespace Agent
                 string animName = _stream.ReadCString();
                 ACSLocator animInfo = ReadLocator();
 
-                _animations.Add(animName.ToLower(), animInfo);
+                _animations.Add(animName.ToLowerInvariant(), animInfo);
             }
         }
 
@@ -158,7 +158,7 @@ namespace Agent
 
         public AnimationInfo ReadAnimation(string name)
         {
-            if (!_animations.TryGetValue(name.ToLower(), out ACSLocator value))
+            if (!_animations.TryGetValue(name.ToLowerInvariant(), out ACSLocator value))
                 return new();
 
             _stream.Seek(value.Offset, SeekOrigin.Begin);
