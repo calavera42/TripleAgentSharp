@@ -40,11 +40,13 @@ namespace Agent
         /// <summary>
         /// Chamar pelo menos uma vez a cada 10 ms
         /// </summary>
-        public void Update()
+        public bool Update()
         {
             if ((DateTime.UtcNow - _lastFrameChange).TotalMilliseconds < _currentFrame.Duration * 10
                 || _state == AnimationState.Finished)
-                return;
+                return false;
+
+            bool output = false;
 
             switch(_state)
             {
@@ -55,15 +57,17 @@ namespace Agent
                     break;
                 case AnimationState.Running:
                     AdvanceFrame();
-                    if (_currentFrame.Duration != 0)
-                        _lastValidFrameIdx = _currentFrameIdx;
                     break;
             }
 
-            if (_currentFrame.ExitFrameIndex == -2)
-                _state = AnimationState.Finished;
+            if (_currentFrame.Duration != 0)
+            {
+                _lastValidFrameIdx = _currentFrameIdx;
+                output = true;
+            }
 
             _lastFrameChange = DateTime.UtcNow;
+            return output;
         }
 
         public void Exit() => _state = AnimationState.Exiting;

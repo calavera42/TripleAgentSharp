@@ -25,62 +25,40 @@ namespace Agent
         Speaking
     }
 
-    internal interface IAgentDisplay
-    {
-        void PlayAudio(int index);
-        void SetFrame(FrameInfo fi);
-        void SetMouth(OverlayInfo oi);
-        void Move(int x, int y);
-
-        void Show();
-        void Hide();
-
-        Rect GetRect();
-    }
-
     internal class AgentController
     {
         private Animation _animation;
         private AgentFile _agentFile;
         private IAgentDisplay _display;
 
+        private System.Timers.Timer _timer;
+
         public AgentController(AgentFile af, IAgentDisplay iad)
         {
             _agentFile = af;
             _display = iad;
             _animation = new(GetAnimationFromState(AgentState.Showing));
+
+            _timer = new();
+            _timer.Interval = 10;
+            _timer.Elapsed += _timer_Elapsed;
+        }
+
+        private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if(_animation.Update())
+            {
+                FrameInfo fi = _animation.Frame;
+                _display.SetFrame(fi);
+            }
         }
 
         private AnimationInfo GetAnimationFromState(AgentState state)
         {
-            string stateName = GetStateName(state);
+            string stateName = state.ToString();
             string[] animations = _agentFile.GetStateAnimations(stateName);
             int i = Random.Shared.Next(0, animations.Length);
             return _agentFile.ReadAnimation(animations[i]);
-        }
-
-        private static string GetStateName(AgentState state)
-        {
-            string[] labels =
-            {
-                "Showing",
-                "Hiding",
-                "GesturingLeft",
-                "GesturingRight",
-                "GesturingUp",
-                "GesturingDown",
-                "Listening",
-                "Hearing",
-                "IdlingLevel1",
-                "IdlingLevel2",
-                "IdlingLevel3",
-                "MovingLeft",
-                "MovingRight",
-                "MovingUp",
-                "MovingDown",
-                "Speaking"
-            };
-            return labels[(int)state];
         }
     }
 }

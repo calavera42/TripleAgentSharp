@@ -115,7 +115,7 @@ namespace Agent
                 ImageData = ReadDataBlock(),
             };
 
-            uint uncompressedImageSize = (uint)((info.Width + 3) & 0xFC) * info.Height; // um cálculo mágico derivado dos devaneios de um homem louco
+            uint uncompressedImageSize = (uint)(info.Width * info.Height);
             byte[] imageData = info.ImageData.Data;
 
             if (info.Compressed)
@@ -180,12 +180,12 @@ namespace Agent
 
             for (int i = 0; i < listCount; i++)
             {
-                string name = _stream.ReadCString();
+                string name = _stream.ReadCString().ToLowerInvariant();
                 ushort animationCount = _stream.ReadUInt16();
                 string[] animations = new string[animationCount];
 
                 for (int j = 0; j < animationCount; j++)
-                    animations[j] = _stream.ReadCString();
+                    animations[j] = _stream.ReadCString().ToLowerInvariant();
 
                 output.Add(name, animations);
             }

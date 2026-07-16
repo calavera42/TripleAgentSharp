@@ -43,7 +43,7 @@ namespace Agent
         {
             if (_stepsLeft == 0)
             {
-                _moveTimer.Enabled = false;
+                _moveTimer.Stop();
                 return;
             }
             _stepsLeft--;
@@ -67,7 +67,7 @@ namespace Agent
             _moveDelta = new(b / steps, c / steps);
             _stepsLeft = (int)Math.Round(steps);
 
-            _moveTimer.Enabled = true;
+            _moveTimer.Start();
         }
 
         public void SetFrame(FrameInfo fi)
