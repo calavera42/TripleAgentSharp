@@ -10,9 +10,9 @@ namespace Agent
 
         private System.Windows.Forms.Timer _moveTimer;
 
-        private Point _targetPos;
         private PointF _moveDelta;
-        private int _stepsLeft;
+        private int _stepsTaken;
+        private int _moveSteps;
 
         private FrameInfo _currentFrame;
         private OverlayInfo _mouth;
@@ -41,13 +41,13 @@ namespace Agent
 
         private void MoveTick(object? sender, EventArgs e)
         {
-            if (_stepsLeft == 0)
+            if (_stepsTaken >= _moveSteps)
             {
                 _moveTimer.Stop();
                 return;
             }
-            _stepsLeft--;
-            Location = new((int)MathF.Round(_moveDelta.X * _stepsLeft), (int)MathF.Round(_moveDelta.Y * _stepsLeft));
+            _stepsTaken++;
+            Location = new((int)MathF.Round(_moveDelta.X * _stepsTaken), (int)MathF.Round(_moveDelta.Y * _stepsTaken));
         }
 
         public void PlayAudio(int index)
@@ -65,7 +65,8 @@ namespace Agent
             float steps = MathF.Round(MathF.Sqrt(b * b + c * c)) / stepSize;
 
             _moveDelta = new(b / steps, c / steps);
-            _stepsLeft = (int)Math.Round(steps);
+            _moveSteps = (int)Math.Round(steps);
+            _stepsTaken = 0;
 
             _moveTimer.Start();
         }
@@ -91,18 +92,23 @@ namespace Agent
                 return;
             }
 
+            bool mouthOverlay = _mouth.OverlayType != MouthOverlay.Closed;
+
             g.Clear(_agentFile.TransparencyColor);
-
-            for (int i = 0; i < _currentFrame.Layers.Length; i++)
+            for (int i = _currentFrame.Layers.Length; i >= 0; i--) // é desenhado de trás pra frente
             {
-                FrameImage fi = _currentFrame.Layers[i];
+                if (mouthOverlay && _mouth.ReplaceTopFrameImage && i == 0)
+                    break;
 
+                FrameImage fi = _currentFrame.Layers[i];
+                using Bitmap layer = _agentFile.ReadImage(fi.ImageIndex);
+                g.DrawImage(layer, fi.OffsetX, fi.OffsetY);
             }
 
-            foreach(FrameImage fi in _currentFrame.Layers)
+            if(mouthOverlay)
             {
-                Bitmap layer = _agentFile.ReadImage(fi.ImageIndex);
-                g.DrawImage(layer, new PointF(fi.OffsetX, fi.OffsetY));
+                using Bitmap overlay = _agentFile.ReadImage(_mouth.ImageIndex);
+                g.DrawImage(overlay, _mouth.OffsetX, _mouth.OffsetY);
             }
         }
 
