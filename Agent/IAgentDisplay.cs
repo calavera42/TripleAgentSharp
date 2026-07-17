@@ -12,6 +12,8 @@ namespace Agent
         void Show();
         void Hide();
 
+        bool IsReady();
+
         Rect GetRect();
     }
 }

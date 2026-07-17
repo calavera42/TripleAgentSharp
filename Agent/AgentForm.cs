@@ -10,14 +10,19 @@ namespace Agent
 
         private System.Windows.Forms.Timer _moveTimer;
 
-        private PointF _moveDelta;
-        private int _stepsTaken;
-        private int _moveSteps;
+        private Point _target;
+        private Point _start;
+        private double _moveProgress;
+        private double _progressIncrement;
 
-        private FrameInfo _currentFrame;
+        private FrameInfo? _currentFrame;
         private OverlayInfo _mouth;
 
+        private readonly object _lockObject = new();
+
         private Bitmap? _drewnAgent;
+
+        public int FlightDurationMs = 1500;
 
         public AgentForm(AgentFile af)
         {
@@ -25,10 +30,11 @@ namespace Agent
             _agentFile = af;
 
             _moveTimer = new();
-            _moveTimer.Interval = 100;
+            _moveTimer.Interval = 20;
             _moveTimer.Tick += MoveTick;
 
             TopMost = true;
+            DoubleBuffered = true;
             FormBorderStyle = FormBorderStyle.None;
             Width = af.Width;
             Height = af.Height;
@@ -37,17 +43,29 @@ namespace Agent
             Invalidated += AgentFormInvalidated;
         }
 
-        private void AgentFormInvalidated(object? sender, InvalidateEventArgs e) => _drewnAgent = null;
+        private async void AgentFormInvalidated(object? sender, InvalidateEventArgs e)
+        {
+            _drewnAgent = null;
+            if(_currentFrame != null)
+                PaintAgent();
+        }
 
         private void MoveTick(object? sender, EventArgs e)
         {
-            if (_stepsTaken >= _moveSteps)
+            if (_moveProgress + float.Epsilon >= 1.0f)
             {
                 _moveTimer.Stop();
+                Location = _target;
                 return;
             }
-            _stepsTaken++;
-            Location = new((int)MathF.Round(_moveDelta.X * _stepsTaken), (int)MathF.Round(_moveDelta.Y * _stepsTaken));
+            _moveProgress += _progressIncrement;
+
+            Point delta = new(_target.X - _start.X, _target.Y - _start.Y);
+
+            Location = new(
+                (int)Math.Round(_start.X + (_moveProgress * delta.X)), 
+                (int)Math.Round(_start.Y + (_moveProgress * delta.Y))
+            );
         }
 
         public void PlayAudio(int index)
@@ -58,60 +76,78 @@ namespace Agent
 
         public new void Move(int x, int y)
         {
-            const int stepSize = 10;
-            int b = Math.Abs(x - Location.X);
-            int c = Math.Abs(y - Location.Y);
+            _moveProgress = 0;
+            _progressIncrement = (1d / (FlightDurationMs - 1000)) * _moveTimer.Interval;
+            _target = new(x, y);
+            _start = Location;
 
-            float steps = MathF.Round(MathF.Sqrt(b * b + c * c)) / stepSize;
-
-            _moveDelta = new(b / steps, c / steps);
-            _moveSteps = (int)Math.Round(steps);
-            _stepsTaken = 0;
-
-            _moveTimer.Start();
+            Invoke(_moveTimer.Start);
         }
 
         public void SetFrame(FrameInfo fi)
         {
-            _currentFrame = fi;
-            Invalidate();
+            if (fi.Equals(_currentFrame))
+                return;
+            lock(_lockObject)
+            {
+                _currentFrame = fi;
+            }
+            Invoke(Invalidate);
         }
 
         public void SetMouth(OverlayInfo oi)
         {
-            _mouth = oi;
-            Invalidate();
+            if (oi.Equals(_mouth))
+                return;
+            lock(_lockObject)
+            {
+                _mouth = oi;
+            }
+            Invoke(Invalidate);
+        }
+
+        public void PaintAgent()
+        {
+            if (_currentFrame == null)
+                return;
+
+            lock (_lockObject)
+            {
+                _drewnAgent = new(_agentFile.Width, _agentFile.Height);
+                using Graphics g = Graphics.FromImage(_drewnAgent);
+
+                bool mouthOverlay = _mouth.OverlayType != MouthOverlay.Closed;
+
+                g.Clear(_agentFile.TransparencyColor);
+                for (int i = _currentFrame.Value.Layers.Length - 1; i >= 0; i--) // é desenhado de trás pra frente
+                {
+                    if (mouthOverlay && _mouth.ReplaceTopFrameImage && i == 0)
+                        break;
+
+                    FrameImage fi = _currentFrame.Value.Layers[i];
+                    using Bitmap layer = _agentFile.ReadImage(fi.ImageIndex);
+                    g.DrawImage(layer, fi.OffsetX, fi.OffsetY);
+                }
+
+                if (mouthOverlay)
+                {
+                    using Bitmap overlay = _agentFile.ReadImage(_mouth.ImageIndex);
+                    g.DrawImage(overlay, _mouth.OffsetX, _mouth.OffsetY);
+                }
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            if(_drewnAgent != null)
-            {
-                g.DrawImage(_drewnAgent, 0, 0);
+            if (_drewnAgent == null)
                 return;
-            }
-
-            bool mouthOverlay = _mouth.OverlayType != MouthOverlay.Closed;
-
-            g.Clear(_agentFile.TransparencyColor);
-            for (int i = _currentFrame.Layers.Length; i >= 0; i--) // é desenhado de trás pra frente
-            {
-                if (mouthOverlay && _mouth.ReplaceTopFrameImage && i == 0)
-                    break;
-
-                FrameImage fi = _currentFrame.Layers[i];
-                using Bitmap layer = _agentFile.ReadImage(fi.ImageIndex);
-                g.DrawImage(layer, fi.OffsetX, fi.OffsetY);
-            }
-
-            if(mouthOverlay)
-            {
-                using Bitmap overlay = _agentFile.ReadImage(_mouth.ImageIndex);
-                g.DrawImage(overlay, _mouth.OffsetX, _mouth.OffsetY);
-            }
+            Graphics g = e.Graphics;
+            g.DrawImage(_drewnAgent, 0, 0);
+            return;
         }
 
         public Rect GetRect() => new() { Top = Location.Y, Bottom = Location.Y + Height, Left = Location.X, Right = Location.X + Width };
+
+        public bool IsReady() => Created;
     }
 }

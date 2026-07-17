@@ -27,10 +27,12 @@ namespace Agent
         [STAThread]
         static void Main()
         {
-            DumpAnimations("e:/peedy.acs");
-            DumpAnimations("e:/merlin.acs");
-            DumpAnimations("e:/merlinsfx.acs");
-            Console.ReadLine();
+            AgentFile file = new(File.OpenRead("e:/peedy.acs"));
+
+            AgentForm af = new(file);
+            AgentController agentController = new(file, af);
+
+            Application.Run();
         }
 
         public static void DumpAnimations(string path)

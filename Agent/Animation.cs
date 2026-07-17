@@ -5,17 +5,19 @@ namespace Agent
     internal class Animation
     {
         private AnimationInfo _animationInfo;
-        private AnimationState _state;
+        private AnimationState _state = AnimationState.Running;
+        private AnimationState _prevState = AnimationState.Running;
 
         private int _lastValidFrameIdx = 0;
         private int _currentFrameIdx = 0;
 
-        private DateTime _lastFrameChange = DateTime.Now;
-
         private FrameInfo _currentFrame => _animationInfo.Frames[_currentFrameIdx];
 
         public FrameInfo Frame => _animationInfo.Frames[_lastValidFrameIdx];
+        public AnimationInfo Info => _animationInfo;
         public AnimationState State => _state;
+
+        public event EventHandler<(AnimationState prev, AnimationState current)>? StateChanged;
 
         public Animation(AnimationInfo ai) => _animationInfo = ai;
 
@@ -25,7 +27,7 @@ namespace Agent
             int count = 0;
             foreach(BranchInfo b in _currentFrame.Branches)
             {
-                count += b.TargetFrameIndex;
+                count += b.Probability;
                 if (selection < count)
                 {
                     _currentFrameIdx = b.TargetFrameIndex;
@@ -37,18 +39,19 @@ namespace Agent
                 _currentFrameIdx++;
         }
 
-        /// <summary>
-        /// Chamar pelo menos uma vez a cada 10 ms
-        /// </summary>
-        public bool Update()
+        public void Update()
         {
-            if ((DateTime.UtcNow - _lastFrameChange).TotalMilliseconds < _currentFrame.Duration * 10
-                || _state == AnimationState.Finished)
-                return false;
+            if (_currentFrame.Duration != 0)
+                _lastValidFrameIdx = _currentFrameIdx;
 
-            bool output = false;
+            if (_currentFrame.ExitFrameIndex == -2)
+            {
+                ChangeState(AnimationState.Finished);
+                _currentFrameIdx = _lastValidFrameIdx;
+                return;
+            }
 
-            switch(_state)
+            switch (_state)
             {
                 case AnimationState.Exiting:
                     int targetFrame = _currentFrame.ExitFrameIndex;
@@ -59,17 +62,15 @@ namespace Agent
                     AdvanceFrame();
                     break;
             }
-
-            if (_currentFrame.Duration != 0)
-            {
-                _lastValidFrameIdx = _currentFrameIdx;
-                output = true;
-            }
-
-            _lastFrameChange = DateTime.UtcNow;
-            return output;
         }
 
-        public void Exit() => _state = AnimationState.Exiting;
+        private void ChangeState(AnimationState target)
+        {
+            _prevState = _state;
+            _state = target;
+            StateChanged?.Invoke(this, (_prevState, _state));
+        }
+
+        public void Exit() => ChangeState(AnimationState.Exiting);
     }
 }

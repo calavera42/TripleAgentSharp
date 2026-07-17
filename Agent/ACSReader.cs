@@ -81,6 +81,7 @@ namespace Agent
             {
                 for (int i = 0; i < colorTableSize; i++)
                     b.SetPixel(i, 0, ReadColor());
+                b.ConvertFormat(PixelFormat.Format8bppIndexed);
                 output.Palette = b.Palette;
             }
 
