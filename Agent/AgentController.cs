@@ -25,6 +25,14 @@ namespace Agent
         Speaking
     }
 
+    internal enum ControllerState
+    {
+        Idling,
+        RestPose,
+        SpeakPose,
+
+    }
+
     internal class AgentController
     {
         private Animation _animation;
@@ -34,11 +42,13 @@ namespace Agent
         private Thread _agentThread;
         private CancellationToken _cancellationToken;
 
+
+
         public AgentController(AgentFile af, IAgentDisplay iad)
         {
             _agentFile = af;
             _display = iad;
-            _animation = new(GetAnimationFromState(AgentState.Showing));
+            _animation = new(GetAnimationFromState(AgentState.MovingLeft));
 
             _display.Show();
 
@@ -52,10 +62,10 @@ namespace Agent
 
         private void AnimationStateChanged(object? sender, (AnimationState prev, AnimationState current) e)
         {
-            if (e.current == AnimationState.Finished && 
-                _animation.Info.TransitionType == TransitionType.ExitBranches && 
-                e.prev == AnimationState.Running)
-                _animation.Exit();
+            //if (e.current == AnimationState.Finished && 
+            //    _animation.Info.TransitionType == TransitionType.ExitBranches && 
+            //    e.prev == AnimationState.Running)
+            //    _animation.Exit();
                 
         }
 
@@ -71,7 +81,7 @@ namespace Agent
                         _display.PlayAudio(e.AudioIndex);
 
                     _animation.Update();
-                }
+                } 
 
                 if (_cancellationToken.IsCancellationRequested) // TODO: tocar a animação de hide
                     break;

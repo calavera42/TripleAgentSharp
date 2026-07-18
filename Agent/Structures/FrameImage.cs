@@ -9,7 +9,7 @@ namespace Agent.Structures
     public struct FrameImage // ushort
     {
         public uint ImageIndex;
-        public uint OffsetX;
-        public uint OffsetY;
+        public short OffsetX;
+        public short OffsetY;
     }
 }

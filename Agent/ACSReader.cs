@@ -395,8 +395,8 @@ namespace Agent
                 FrameImage image = new()
                 {
                     ImageIndex = _stream.ReadUInt32(),
-                    OffsetX = _stream.ReadUInt16(),
-                    OffsetY = _stream.ReadUInt16()
+                    OffsetX = _stream.ReadInt16(),
+                    OffsetY = _stream.ReadInt16()
                 };
 
                 output[i] = image;

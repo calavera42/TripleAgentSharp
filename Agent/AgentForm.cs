@@ -34,25 +34,33 @@ namespace Agent
             _moveTimer.Tick += MoveTick;
 
             TopMost = true;
-            DoubleBuffered = true;
             FormBorderStyle = FormBorderStyle.None;
             Width = af.Width;
             Height = af.Height;
             TransparencyKey = af.TransparencyColor;
+            BackColor = TransparencyKey;
 
             Invalidated += AgentFormInvalidated;
+            Paint += AgentFormPaint;
+        }
+
+        private void AgentFormPaint(object? sender, PaintEventArgs e)
+        {
+            if (_drewnAgent == null)
+                return;
+            Graphics g = e.Graphics;
+            g.DrawImage(_drewnAgent, 0, 0);
         }
 
         private async void AgentFormInvalidated(object? sender, InvalidateEventArgs e)
         {
             _drewnAgent = null;
-            if(_currentFrame != null)
-                PaintAgent();
+            PaintAgent();
         }
 
         private void MoveTick(object? sender, EventArgs e)
         {
-            if (_moveProgress + float.Epsilon >= 1.0f)
+            if (_moveProgress + double.Epsilon >= 1.0f)
             {
                 _moveTimer.Stop();
                 Location = _target;
@@ -135,15 +143,6 @@ namespace Agent
                     g.DrawImage(overlay, _mouth.OffsetX, _mouth.OffsetY);
                 }
             }
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            if (_drewnAgent == null)
-                return;
-            Graphics g = e.Graphics;
-            g.DrawImage(_drewnAgent, 0, 0);
-            return;
         }
 
         public Rect GetRect() => new() { Top = Location.Y, Bottom = Location.Y + Height, Left = Location.X, Right = Location.X + Width };
